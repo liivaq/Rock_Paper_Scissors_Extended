@@ -1,0 +1,17 @@
+{
+    "name": "liiva/mitigate",
+    "autoload": {
+        "psr-4": {
+            "App\\": "app/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Liva Kusina",
+            "email": "liiva.kusina@gmail.com"
+        }
+    ],
+    "require": {
+      "ext-readline": "*"
+    }
+}
