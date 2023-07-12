@@ -61,14 +61,20 @@ class Game
                 echo '--------------------------------------------------------------------------------' . PHP_EOL;
             }
 
-            $this->determineGameWinner($computerPlayer, $this->player);
+            $gameWinner = $this->determineGameWinner($computerPlayer, $this->player);
+            echo $gameWinner ? $gameWinner->getName() . ' has won the game ' . $computerPlayer->roundWins .
+                ' to ' . $this->player->roundWins . PHP_EOL : 'The game ends in tie!'.PHP_EOL;
             $this->resetGame($computerPlayer, $this->player);
             echo '--------------------------------------------------------------------------------' . PHP_EOL;
         }
 
-        echo 'Results from all the computer vs computer games: ' . PHP_EOL;
+        echo 'Computers are battling with each-other: ' . PHP_EOL;
         echo '--------------------------------------------------------------------------------' . PHP_EOL;
         $this->computerVsComputer();
+        for($i=0; $i<5; $i++){
+            echo '...'.PHP_EOL;
+            sleep(1);
+        }
         echo '--------------------------------------------------------------------------------' . PHP_EOL;
         $this->registerScores();
         echo 'Final Tournament results: ' . PHP_EOL;
@@ -134,22 +140,19 @@ class Game
         if ($computerPlayer->roundWins > $player->roundWins) {
             $computerPlayer->totalWins++;
             $player->totalLosses++;
-            echo $computerPlayer->getName() . ' has won the game ' . $computerPlayer->roundWins .
-                ' to ' . $player->roundWins . ' against ' . $player->getName() . PHP_EOL;
+            return $computerPlayer;
         }
 
         if ($computerPlayer->roundWins < $player->roundWins) {
             $player->totalWins++;
             $computerPlayer->totalLosses++;
-            echo $player->getName() . ' has won the game ' . $player->roundWins .
-                ' to ' . $computerPlayer->roundWins . ' against ' . $computerPlayer->getName() . PHP_EOL;
+            return $player;
         }
 
         if ($computerPlayer->roundWins === $player->roundWins) {
             $computerPlayer->totalTies++;
             $player->totalTies++;
-            echo $computerPlayer->getName() . ' and ' . $player->getName() .
-                ' has tied the game! Both have won ' . $player->roundWins . ' rounds' . PHP_EOL;
+            return null;
         }
     }
 
@@ -204,12 +207,10 @@ class Game
 
     private function registerScores()
     {
-        $this->results[] = $this->player->getName() . ': wins ' . $this->player->totalWins .
-            ' losses: ' . $this->player->totalLosses .
-            ' ties: ' . $this->player->totalTies;
+        $this->computerPlayers[] = $this->player;
 
         foreach ($this->computerPlayers as $player) {
-            $this->results[] = $player->getName() . ': wins ' . $player->totalWins .
+            $this->results[] = $player->getName() . ': wins: ' . $player->totalWins .
                 ' losses: ' . $player->totalLosses .
                 ' ties: ' . $player->totalTies;
         }
