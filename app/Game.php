@@ -39,15 +39,17 @@ class Game
     public function play()
     {
         /** @var Player $computerPlayer */
-        foreach ($this->computerPlayers as $computerPlayer) {
+        foreach ($this->computerPlayers as $number => $computerPlayer) {
 
+            echo '---------- Game number '.($number+1).'. Good luck! ----------'.PHP_EOL;
+            echo '--------------------------------------------------------------------------------' . PHP_EOL;
             echo 'You are playing against: ' . $computerPlayer->getName() . PHP_EOL;
             echo '--------------------------------------------------------------------------------' . PHP_EOL;
 
             while ($this->rounds < $this->maxRounds) {
 
-                $this->playersChoice();
-                $this->computersChoice($computerPlayer);
+                $this->choosePlayerElement();
+                $this->chooseComputerElement($computerPlayer);
 
                 echo $computerPlayer->getName() . ' chose: '
                     . ucfirst($computerPlayer->getChosenElement()->getName()) . PHP_EOL;
@@ -62,17 +64,21 @@ class Game
             }
 
             $gameWinner = $this->determineGameWinner($computerPlayer, $this->player);
+
             echo $gameWinner ? $gameWinner->getName() . ' has won the game ' . $computerPlayer->roundWins .
-                ' to ' . $this->player->roundWins . PHP_EOL : 'The game ends in tie!'.PHP_EOL;
+                ' to ' . $this->player->roundWins . PHP_EOL : 'The game ends in tie!' . PHP_EOL;
+
             $this->resetGame($computerPlayer, $this->player);
+
             echo '--------------------------------------------------------------------------------' . PHP_EOL;
         }
 
-        echo 'Computers are battling with each-other: ' . PHP_EOL;
+        echo 'Just a second...Computers are battling with each-other: ' . PHP_EOL;
         echo '--------------------------------------------------------------------------------' . PHP_EOL;
+
         $this->computerVsComputer();
-        for($i=0; $i<5; $i++){
-            echo '...'.PHP_EOL;
+        for ($i = 0; $i < 3; $i++) {
+            echo '...' . PHP_EOL;
             sleep(1);
         }
         echo '--------------------------------------------------------------------------------' . PHP_EOL;
@@ -87,17 +93,17 @@ class Game
             echo $winner->getName() . PHP_EOL;
         }
         echo '--------------------------------------------------------------------------------' . PHP_EOL;
-        echo '--------------------------------------------------------------------------------' . PHP_EOL;
 
     }
 
-    private function playersChoice()
+    private function choosePlayerElement()
     {
         $validInput = false;
-        while ($validInput === false) {
+
+        while (!$validInput) {
             $playerInput = readline('Choose your element: ');
             $playerInput = ucfirst(strtolower(trim($playerInput)));
-            $validInput = $this->validateInput($playerInput);
+            $validInput = $this->validateElement($playerInput);
             echo $validInput ? 'You chose: ' . $playerInput . PHP_EOL : 'Invalid choice. Choose again!' . PHP_EOL;
         }
 
@@ -106,7 +112,7 @@ class Game
         $this->player->setChosenElement(new $playerSymbol);
     }
 
-    private function computersChoice(Player $computerPlayer)
+    private function chooseComputerElement(Player $computerPlayer)
     {
         $computerPlayer->setChosenElement($this->getRandomElement());
     }
@@ -149,22 +155,21 @@ class Game
             return $player;
         }
 
-        if ($computerPlayer->roundWins === $player->roundWins) {
-            $computerPlayer->totalTies++;
-            $player->totalTies++;
-            return null;
-        }
+        $computerPlayer->totalTies++;
+        $player->totalTies++;
+        return null;
+
     }
 
     public function determineTournamentWinner(): array
     {
         $this->computerPlayers[] = $this->player;
 
-        $winner = array_reduce($this->computerPlayers, function ($a, $b) {
-            if ($a === null || $a->totalWins < $b->totalWins) {
-                return $b;
+        $winner = array_reduce($this->computerPlayers, function ($playerOne, $playerTwo) {
+            if ($playerOne === null || $playerOne->totalWins < $playerTwo->totalWins) {
+                return $playerTwo;
             }
-            return $a;
+            return $playerOne;
         });
 
         $maxWins = $winner->totalWins;
@@ -185,8 +190,8 @@ class Game
                 $opponentPlayer = $this->computerPlayers[$j];
 
                 for ($round = 1; $round <= $this->maxRounds; $round++) {
-                    $this->computersChoice($currentPlayer);
-                    $this->computersChoice($opponentPlayer);
+                    $this->chooseComputerElement($currentPlayer);
+                    $this->chooseComputerElement($opponentPlayer);
                     $this->determineRoundWinner($currentPlayer, $opponentPlayer);
                 }
 
@@ -216,7 +221,7 @@ class Game
         }
     }
 
-    private function validateInput(string $elementChoice): bool
+    private function validateElement(string $elementChoice): bool
     {
         return in_array($elementChoice, $this->elements);
     }
